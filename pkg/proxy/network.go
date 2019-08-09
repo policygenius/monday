@@ -46,6 +46,14 @@ func generateIP(a byte, b byte, c byte, d int, port string) (net.IP, error) {
 	if err != nil {
 		return net.IP{}, err
 	}
+	//Check if we are running linux and return the ip address if port is available
+	if iface.Name == "lo" {
+		_, err := net.Dial("tcp", ip.String()+":"+port)
+		if err != nil {
+			return ip, nil
+		}
+		return ip, err
+	}
 
 	// Add a new IP address on the network interface
 	command := "ifconfig"

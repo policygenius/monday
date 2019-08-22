@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"io"
 	"net"
+	"os"
 	"strconv"
 	"sync"
 
@@ -68,12 +69,31 @@ func (p *Proxy) Listen() error {
 			}
 
 			p.view.Writef("🔌  Proxifying %s locally (%s:%s) <-> forwarding to %s:%s\n", pf.GetHostname(), pf.LocalIP, pf.LocalPort, pf.GetProxyHostname(), pf.ProxyPort)
+			err := writeToIni(pf.Hostname, pf.LocalPort)
+			if err != nil {
+				return err
+			}
 
 			go p.handleConnections(pf, key)
 		}
 	}
 
 	return nil
+}
+func writeToIni(hs string, lp string) error {
+	file, err := os.OpenFile(".mappings.ini", os.O_WRONLY|os.O_APPEND|os.O_CREATE, 0644)
+	if err != nil {
+		return err
+	}
+	defer file.Close()
+
+	mappings := fmt.Sprintf("%s:%s\n", hs, lp)
+	_, err = file.WriteString(mappings)
+	if err != nil {
+		return err
+	}
+	return nil
+
 }
 
 // Stop stops all currently active proxy listeners
@@ -187,6 +207,5 @@ func (p *Proxy) generateIP(pf *ProxyForward) error {
 func (p *Proxy) generateProxyPort(proxyForward *ProxyForward) {
 	integerPort, _ := strconv.Atoi(p.latestPort)
 	p.latestPort = strconv.Itoa(integerPort + 1)
-
 	proxyForward.SetProxyPort(p.latestPort)
 }

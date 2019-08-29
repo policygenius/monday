@@ -101,13 +101,15 @@ $ monday init
 Once your configuration file is ready, you can simply run Monday:
 
 ```bash
-$ monday
+$ monday [--ui]
 ```
+
+Note the `--ui` option that will allow you to enable the user interface (you can also define a `MONDAY_ENABLE_UI` environment variable to enable it).
 
 Or, you can run a specific project directly by running:
 
 ```bash
-$ monday run <project name>
+$ monday run [--ui] <project name>
 ```
 
 When you want to edit your configuration again, simply run this command to open it in your favorite editor:
@@ -115,6 +117,18 @@ When you want to edit your configuration again, simply run this command to open 
 ```bash
 $ monday edit
 ```
+
+
+## Environment variables
+
+The following environment variables can be used to tweak your Monday configuration:
+
+
+| Environment variable         | Description                                                                               |
+|:----------------------------:|-------------------------------------------------------------------------------------------|
+| MONDAY_CONFIG_PATH           | Specify the configuration path where your YAML files can be found                         |
+| MONDAY_KUBE_CONFIG           | Specify the location of your Kubernetes config file  (if not in your home directory)      |
+| MONDAY_ENABLE_UI             | Specify that you want to use the terminal UI instead of simply logging to stdout          |
 
 ## Configuration
 

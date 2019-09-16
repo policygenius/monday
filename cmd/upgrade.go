@@ -15,7 +15,7 @@ import (
 const (
 	latestReleaseURL = "https://api.github.com/repos/policygenius/monday/releases/latest"
 	binaryURLPattern = "https://github.com/policygenius/monday/releases/latest/download/bifrost-%s.zip"
-	binaryFilepath   = "/usr/local/bin/monday"
+	binaryFilepath   = "/usr/local/bin/bifrost"
 )
 
 type GithubAPIResponse struct {

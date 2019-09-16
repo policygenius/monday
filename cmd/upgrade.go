@@ -73,7 +73,6 @@ var upgradeCmd = &cobra.Command{
 			return
 		}
 		defer out.Close()
-
 		// Write binary
 		_, err = io.Copy(out, resp.Body)
 		if err != nil {
@@ -81,7 +80,7 @@ var upgradeCmd = &cobra.Command{
 			return
 		}
 
-		fmt.Printf("✅  Monday has been successfully upgraded. You are now on latest version: %s\n", githubResponse.TagName)
+		fmt.Printf("✅  Bifrost has been successfully upgraded. You are now on latest version: %s\n", githubResponse.TagName)
 		return
 	},
 }

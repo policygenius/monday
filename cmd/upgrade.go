@@ -14,7 +14,7 @@ import (
 
 const (
 	latestReleaseURL = "https://api.github.com/repos/policygenius/monday/releases/latest"
-	binaryURLPattern = "https://github.com/policygenius/monday/releases/latest/download/monday-%s-%s"
+	binaryURLPattern = "https://github.com/policygenius/monday/releases/latest/download/monday-%s.zip"
 	binaryFilepath   = "/usr/local/bin/monday"
 )
 
@@ -48,7 +48,16 @@ var upgradeCmd = &cobra.Command{
 		// Download the right binary depending on OS and architecture
 		fmt.Printf("👉  Downloading binary for your OS (%s/%s)...\n", runtime.GOOS, runtime.GOARCH)
 
-		binaryURL := fmt.Sprintf(binaryURLPattern, runtime.GOOS, runtime.GOARCH)
+		var ostype string
+		switch os := runtime.GOOS; os {
+		case "darwin":
+			ostype = "mac"
+		case " linux":
+			ostype = "linux"
+
+		}
+
+		binaryURL := fmt.Sprintf(binaryURLPattern, ostype)
 
 		resp, err := http.Get(binaryURL)
 		if err != nil {

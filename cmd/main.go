@@ -70,6 +70,8 @@ func main() {
 	rootCmd.AddCommand(runCmd)
 	rootCmd.AddCommand(upgradeCmd)
 	rootCmd.AddCommand(versionCmd)
+	rootCmd.AddCommand(doctorCmd)
+	rootCmd.AddCommand(rebuildCmd)
 
 	if err := rootCmd.Execute(); err != nil {
 		fmt.Printf("❌  An error has occured during 'edit' command: %v\n", err)
@@ -83,7 +85,7 @@ func initRuntimeEnvironment() {
 		openerCommand = "open"
 
 	default:
-		openerCommand = "gedit"
+		openerCommand = "vim"
 	}
 }
 

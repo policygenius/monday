@@ -14,9 +14,9 @@ import (
 
 const (
 	// Filename is the name single YAML configuration file name
-	Filename = "monday.yaml"
+	Filename = "bifrost.yaml"
 	// MultipleFilenamePattern is the name pattern for multiple YAML configuration files
-	MultipleFilenamePattern = "monday*.yaml"
+	MultipleFilenamePattern = "bifrost*.yaml"
 )
 
 var (
@@ -148,7 +148,7 @@ func (c *Config) GetProjectByName(name string) (*Project, error) {
 }
 
 func getConfigPath() string {
-	if value := os.Getenv("MONDAY_CONFIG_PATH"); value != "" {
+	if value := os.Getenv("BIFROST_CONFIG_PATH"); value != "" {
 		return value
 	}
 

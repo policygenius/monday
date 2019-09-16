@@ -4,10 +4,14 @@ help:
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}'
 
 build: ## Builds a local version of Monday from sources
-	go build -ldflags "-X main.Version=sources-$(shell git rev-parse --short=5 HEAD)" -o monday ./cmd && mv monday /usr/local/bin
+	go build -ldflags "-X main.Version=sources-$(shell git rev-parse --short=5 HEAD)" -o bifrost ./cmd && mv bifrost /usr/local/bin
+
+build-mac:
+	GOOS=darwin GOARCH=amd64 go build -ldflags "-X main.Version=sources-$(shell git rev-parse --short=5 HEAD)" -o bifrost ./cmd 
+
 
 build-binary: ## Builds a single binary of Monday from sources
-	/usr/local/bin/go build -ldflags "-X main.Version=sources-$(shell git rev-parse --short=5 HEAD)" -o monday ./cmd
+	/usr/local/bin/go build -ldflags "-X main.Version=sources-$(shell git rev-parse --short=5 HEAD)" -o bifrost ./cmd
 
 generate-mocks: ## Generate mocks for tests
 	@echo "> generating mocks..."

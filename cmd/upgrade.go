@@ -14,7 +14,7 @@ import (
 
 const (
 	latestReleaseURL = "https://api.github.com/repos/policygenius/monday/releases/latest"
-	binaryURLPattern = "https://github.com/policygenius/monday/releases/latest/download/monday-%s.zip"
+	binaryURLPattern = "https://github.com/policygenius/monday/releases/latest/download/bifrost-%s.zip"
 	binaryFilepath   = "/usr/local/bin/monday"
 )
 

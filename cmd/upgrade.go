@@ -69,7 +69,7 @@ var upgradeCmd = &cobra.Command{
 		// Create the binary file
 		out, err := os.Create(binaryFilepath)
 		if err != nil {
-			fmt.Printf("❌  An error has occured while trying to create binary file to: %s\n", binaryFilepath)
+			fmt.Printf("❌  An error has occured while trying to create binary file to: %s:%s\n", binaryFilepath, err)
 			return
 		}
 		defer out.Close()

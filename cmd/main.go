@@ -22,7 +22,7 @@ import (
 )
 
 const (
-	name = "Monday"
+	name = "bifrost"
 )
 
 var (

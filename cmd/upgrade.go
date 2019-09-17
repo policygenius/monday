@@ -65,7 +65,6 @@ var upgradeCmd = &cobra.Command{
 			return
 		}
 		defer resp.Body.Close()
-
 		// Create the binary file
 		out, err := os.Create(binaryFilepath)
 		if err != nil {

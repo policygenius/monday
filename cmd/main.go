@@ -7,6 +7,9 @@ import (
 	"runtime"
 	"strconv"
 	"syscall"
+	"net/http"
+	"io/ioutil"
+	"encoding/json"
 
 	"github.com/policygenius/monday/pkg/config"
 	"github.com/policygenius/monday/pkg/forwarder"
@@ -35,10 +38,11 @@ var (
 
 	openerCommand string
 
-	uiEnabled = len(os.Getenv("MONDAY_ENABLE_UI")) > 0
+	uiEnabled = len(os.Getenv("BIFROST_ENABLE_UI")) > 0
 )
 
 func main() {
+	checkVersion()
 	initRuntimeEnvironment()
 
 	rootCmd := &cobra.Command{
@@ -68,7 +72,7 @@ func main() {
 	rootCmd.AddCommand(editCmd)
 	rootCmd.AddCommand(initCmd)
 	rootCmd.AddCommand(runCmd)
-	rootCmd.AddCommand(upgradeCmd)
+	//rootCmd.AddCommand(upgradeCmd)
 	rootCmd.AddCommand(versionCmd)
 	rootCmd.AddCommand(doctorCmd)
 	rootCmd.AddCommand(rebuildCmd)
@@ -145,6 +149,24 @@ func run(conf *config.Config, choice string) {
 	}
 }
 
+func checkVersion(){
+	var vers string
+	vers = "https://api.github.com/repos/policygenius/monday/releases/latest"
+
+	resp, err := http.Get(vers)
+	if err != nil{
+		fmt.Printf("Internal error on startup, could not check version: %v\n", err)
+		return
+	}
+	dat, _ := ioutil.ReadAll(resp.Body)
+	githubResp := &GithubAPIResponse{}
+	json.Unmarshal(dat, githubResp)
+	if githubResp.TagName != Version {
+		fmt.Printf("🐢 There is a new version of bifrost availabe\n🐢 run ./install --upgrade to get newest version \n")
+	}
+	return
+
+}
 // Handle for an exit signal in order to quit application on a proper way (shutting down connections and servers).
 func handleExitSignal() {
 	stop := make(chan os.Signal, 1)
@@ -171,3 +193,4 @@ func quit(g *gocui.Gui, v *gocui.View) error {
 	stopAll()
 	return gocui.ErrQuit
 }
+

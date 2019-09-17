@@ -27,7 +27,6 @@ var upgradeCmd = &cobra.Command{
 	Short: "This command upgrades Monday to its latest version",
 	Long:  `In case a new version of Monday is available, this command will download it and install it locally for you.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		
 		response, err := http.Get(latestReleaseURL)
 		if err != nil {
 			fmt.Printf("❌  An error has occured while contacting GitHub API: %v\n", err)

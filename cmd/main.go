@@ -159,10 +159,11 @@ func checkVersion(){
 		return
 	}
 	dat, _ := ioutil.ReadAll(resp.Body)
-	fmt.Println(string(dat))
 	githubResp := &GithubAPIResponse{}
 	json.Unmarshal(dat, githubResp)
-	fmt.Println(githubResp)
+	if githubResp.TagName != Version {
+		fmt.Printf("🐢 There is a new version of bifrost availabe\n🐢 run ./uninstall --upgrade to get newest version \n")
+	}
 	return
 
 }

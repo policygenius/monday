@@ -12,6 +12,7 @@ import (
 const (
 	StdOut = "stdout"
 	StdErr = "stderr"
+	StdIn = "stdin"
 )
 
 type Logstreamer struct {
@@ -46,6 +47,19 @@ func NewLogstreamer(stdType string, name string, view ui.ViewInterface) *Logstre
 
 	return streamer
 }
+
+func (l *Logstreamer) Read(p []byte) (n int, err error) {
+	if n, err = l.buf.Read(p); err != nil {
+		return
+	}
+
+	err = l.output()
+	if err != nil {
+		panic(err)
+	}
+	return
+}
+
 
 func (l *Logstreamer) Write(p []byte) (n int, err error) {
 	if n, err = l.buf.Write(p); err != nil {
@@ -97,7 +111,8 @@ func (l *Logstreamer) out(str string) (err error) {
 
 	case StdErr:
 		str = l.colorFail + l.name + l.colorReset + " " + str
-
+	case StdIn:
+		str = l.colorOkay + l.name + l.colorReset + "" + str
 	default:
 		str = l.stdType + str
 	}

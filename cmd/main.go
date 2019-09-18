@@ -162,7 +162,7 @@ func checkVersion(){
 	githubResp := &GithubAPIResponse{}
 	json.Unmarshal(dat, githubResp)
 	if githubResp.TagName != Version {
-		fmt.Printf("🐢 There is a new version of bifrost availabe\n🐢 run ./install --upgrade to get newest version \n")
+		fmt.Printf("🐢 There is a new version of bifrost available\n🐢 run ./install --upgrade to get newest version \n")
 	}
 	return
 

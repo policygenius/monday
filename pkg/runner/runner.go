@@ -3,8 +3,11 @@ package runner
 import (
 	"fmt"
 	"os"
+	"io"
+	"log"
 	"os/exec"
 	"strings"
+	"bytes"
 	"sync"
 	"syscall"
 
@@ -16,6 +19,7 @@ import (
 var (
 	execCommand = exec.Command
 	hasSetup    = false
+	debugMode = len(os.Getenv("BIFROST_ENABLE_DEBUG")) > 0
 )
 
 type RunnerInterface interface {
@@ -33,6 +37,26 @@ type Runner struct {
 	applications []*config.Application
 	cmds         map[string]*exec.Cmd
 	view         ui.ViewInterface
+}
+
+type interactiveWriter struct {
+	buf bytes.Buffer
+	w io.Writer
+}
+
+func NewinteractiveWriter(w io.Writer) *interactiveWriter {
+	return &interactiveWriter{
+		w: w,
+	}
+}
+
+func (w *interactiveWriter) Write(d []byte) (int, error) {
+	w.buf.Write(d)
+	return w.w.Write(d)
+}
+
+func (w *interactiveWriter) Bytes() []byte {
+	return w.buf.Bytes()
 }
 
 // NewRunner instancites a Runner struct from configuration data
@@ -76,36 +100,81 @@ func (r *Runner) SetupAll() {
 
 // Run launches the application
 func (r *Runner) Run(application *config.Application) {
-	if err := r.checkApplicationExecutableEnvironment(application); err != nil {
-		r.view.Writef("❌  %s\n", err.Error())
-		return
+
+	if debugMode {
+
+		if err := r.checkApplicationExecutableEnvironment(application); err != nil {
+			r.view.Writef("❌  %s\n", err.Error())
+			return
+		}
+
+		r.view.Writef("⚙️   Running local app '%s' (%s)...\n", application.Name, application.Path)
+
+		applicationPath := application.GetPath()
+
+		stdoutStream := NewLogstreamer(StdOut, application.Name, r.view)
+		stderrStream := NewLogstreamer(StdErr, application.Name, r.view)
+
+		cmd := exec.Command(application.Executable, application.Args...)
+		//cmd.SysProcAttr = &syscall.SysProcAttr{Setpgid: true}
+		cmd.Dir = applicationPath
+		cmd.Stdout = stdoutStream
+		cmd.Stderr = stderrStream
+		//r.view.Writef("Starting....")
+		cmd.Stdin = os.Stdin
+
+		cmd.Env = os.Environ()
+
+		// Add environment variables
+		for key, value := range application.Env {
+			cmd.Env = append(cmd.Env, fmt.Sprintf("%s=%s", key, value))
+		}
+
+		r.cmds[application.Name] = cmd
+
+		if err := cmd.Run(); err != nil {
+			r.view.Writef("❌  Cannot run the following application: %s: %v\n", applicationPath, err)
+			return
+		}
+		cmd.Stdin = os.Stdin
+	}else {
+
+		cmd := exec.Command(application.Executable, application.Args...)
+
+		cmd.Dir = application.GetPath()
+
+		var errStdout, errStderr error
+		stdoutIn, _ := cmd.StdoutPipe()
+		stderrIn, _ := cmd.StderrPipe()
+		stdout := NewinteractiveWriter(os.Stdout)
+		stderr := NewinteractiveWriter(os.Stderr)
+		//cmd.SysProcAttr = &syscall.SysProcAttr{Setpgid: true}
+		cmd.Stdin = os.Stdin
+		err := cmd.Start()
+		if err != nil {
+			log.Fatalf("Unable to run command: %s", err)
+		}
+
+		var wg sync.WaitGroup
+		wg.Add(1)
+
+		go func() {
+			_, errStdout = io.Copy(stdout, stdoutIn)
+			wg.Done()
+		}()
+
+		_, errStderr = io.Copy(stderr, stderrIn)
+		wg.Wait()
+
+		err = cmd.Wait()
+		if err != nil {
+			log.Fatalf("Unable to run command")
+		}
+		if errStdout != nil || errStderr != nil {
+			log.Fatalf("internal failure with std pipe")
+		}
 	}
-
-	r.view.Writef("⚙️   Running local app '%s' (%s)...\n", application.Name, application.Path)
-
-	applicationPath := application.GetPath()
-
-	stdoutStream := NewLogstreamer(StdOut, application.Name, r.view)
-	stderrStream := NewLogstreamer(StdErr, application.Name, r.view)
-
-	cmd := exec.Command(application.Executable, application.Args...)
-	cmd.SysProcAttr = &syscall.SysProcAttr{Setpgid: true}
-	cmd.Dir = applicationPath
-	cmd.Stdout = stdoutStream
-	cmd.Stderr = stderrStream
-	cmd.Env = os.Environ()
-
-	// Add environment variables
-	for key, value := range application.Env {
-		cmd.Env = append(cmd.Env, fmt.Sprintf("%s=%s", key, value))
-	}
-
-	r.cmds[application.Name] = cmd
-
-	if err := cmd.Run(); err != nil {
-		r.view.Writef("❌  Cannot run the following application: %s: %v\n", applicationPath, err)
-		return
-	}
+	
 }
 
 // Restart kills the current application launch (if it exists) and launch a new one

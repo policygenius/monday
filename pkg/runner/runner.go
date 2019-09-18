@@ -116,7 +116,7 @@ func (r *Runner) Run(application *config.Application) {
 		stderrStream := NewLogstreamer(StdErr, application.Name, r.view)
 
 		cmd := exec.Command(application.Executable, application.Args...)
-		//cmd.SysProcAttr = &syscall.SysProcAttr{Setpgid: true}
+		cmd.SysProcAttr = &syscall.SysProcAttr{Setpgid: false}
 		cmd.Dir = applicationPath
 		cmd.Stdout = stdoutStream
 		cmd.Stderr = stderrStream

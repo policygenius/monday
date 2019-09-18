@@ -120,7 +120,6 @@ func (r *Runner) Run(application *config.Application) {
 		cmd.Dir = applicationPath
 		cmd.Stdout = stdoutStream
 		cmd.Stderr = stderrStream
-		//r.view.Writef("Starting....")
 		cmd.Stdin = os.Stdin
 
 		cmd.Env = os.Environ()

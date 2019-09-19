@@ -17,6 +17,7 @@ type View struct {
 	name  string
 	title string
 	view  *gocui.View
+	edit *gocui.Editor
 }
 
 // NewView returns a new instance of a view
